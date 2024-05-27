@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2E003E;
+            color: white;
+        }
+
+        #form-container {
+            background: #4A007A;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .step {
+            display: none;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            width: 80%;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #FF4081;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #FF80AB;
+        }
+    </style>
+</head>
+<body>
+    <div id="form-container">
+        <!-- Paso 1: Número de Teléfono -->
+        <div id="step-1" class="step" style="display: block;">
+            <h2>Introduce tu número de teléfono</h2>
+            <input type="tel" id="phone-number" placeholder="+57 316 447 8466">
+            <button onclick="nextStep(1)">Siguiente</button>
+        </div>
+        <!-- Paso 2: Contraseña -->
+        <div id="step-2" class="step">
+            <h2>Escribe tu clave</h2>
+            <input type="password" id="password" placeholder="Clave">
+            <button onclick="nextStep(2)">Siguiente</button>
+        </div>
+        <!-- Paso 3: Nota de Voz -->
+        <div id="step-3" class="step">
+            <h2>Lee y graba esta frase</h2>
+            <p>"Hola, tú sabes quién soy y reconoces el ritmo de mi voz"</p>
+            <button id="record-button">Toca el botón para grabar</button>
+            <button onclick="submitForm()">Enviar</button>
+        </div>
+    </div>
+    <script>
+        function nextStep(step) {
+            document.getElementById(`step-${step}`).style.display = 'none';
+            document.getElementById(`step-${step + 1}`).style.display = 'block';
+        }
+
+        function submitForm() {
+            const phoneNumber = document.getElementById('phone-number').value;
+            const password = document.getElementById('password').value;
+            // Aquí puedes agregar la lógica para manejar la nota de voz
+            console.log(`Número: ${phoneNumber}, Clave: ${password}`);
+            alert('Formulario enviado');
+        }
+
+        // Manejo de grabación de voz
+        const recordButton = document.getElementById('record-button');
+        let mediaRecorder;
+        let audioChunks = [];
+
+        recordButton.addEventListener('click', async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    audioChunks.push(event.data);
+                });
+
+                mediaRecorder.addEventListener('stop', () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg-3' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                });
+
+                recordButton.innerText = 'Grabando... Toca de nuevo para parar';
+            } else if (mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                recordButton.innerText = 'Toca el botón para grabar';
+            }
+        });
+    </script>
+</body>
+</html>
